@@ -15,56 +15,32 @@ library(broom)
 ```
 
 ```{r}
-f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/Street_et_al_2017.csv"
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/zombies.csv"
 d <- read_csv(f, col_names = TRUE)
 ```
 
-Removing NAs
-```{r}
-d_mod <- d %>% filter(!is.na(ECV) & !is.na(Body_mass)) 
-```
-
 
 ```{r}
-m <- lm(data = d_mod, log(ECV) ~ log(Body_mass))
-```
-
-
-Regression coefficient
-```{r}
-b1 <- cor(log(d_mod$ECV), log(d_mod$Body_mass)) * sd(log(d_mod$ECV))/sd(log(d_mod$Body_mass))
-b1
-```
-
-```{r}
-b0 <- mean(log(d_mod$ECV)) - b1*mean(log(d_mod$Body_mass))
-b0
-```
-
-
-```{r}
-model <- lm(formula = log(ECV)~ log(Body_mass), data = d_mod)
-model
-summary(model)
-```
-
-```{r}
-SSY <- sum(m$model$`log(ECV)` - mean(m$model$`log(Body_mass)`))^2
+m <- lm(data = d, height ~ weight)
+# height - mean(height)
+SSY <- sum((m$model$height - mean(m$model$height)) ^ 2) 
 SSY
 ```
 
 ```{r}
-SSR <- sum((m$fitted.values - mean(m$model$`log(ECV)`))^2)
+# predicted height - mean height
+SSR <- sum((m$fitted.values - mean(m$model$height)) ^ 2)
 SSR
 ```
 
 ```{r}
-SSE <- sum((m$model$`log(ECV)` - m$fitted.values)^2)
+# height - predicted height
+SSE <- sum((m$model$height - m$fitted.values) ^ 2) 
 SSE
 ```
 
 ```{r}
-SSEalt <- sum(m$residuals^2)
+SSEalt <- sum(m$residuals ^ 2)
 SSEalt
 ```
 
@@ -73,11 +49,11 @@ SSEalt
 ```
 
 ```{r}
-(df_error <- nrow(d_mod) - df_regression - 1)
+(df_error <- nrow(d) - df_regression - 1) # n - p - 1
 ```
 
 ```{r}
-(df_y <- nrow(d_mod) - df_regression)
+(df_y <- nrow(d) - df_regression)
 ```
 
 ```{r}
@@ -96,80 +72,295 @@ fratio
 ```
 
 ```{r}
+plotDist("f", df1=1, df2=10, col = "green", lty=3, lwd=2,
+          main="Some Example F Distributions",
+          sub = "red vertical line shows critical value\n
+            for df1=1, df2=998",
+          ylab="f(x)",
+          xlab="x",
+          xlim=c(0,5),
+          ylim=c(0,1.5),
+          key=list(space="right",
+          text=list(c("df1=1, df2=1", "df1=2, df2=2", "df1=4, df2=4",
+            "df1=8, df2=100", "df1=1, df2=998")),
+          lines=list(col=c("green", "blue", "red","purple","black"),
+            lty=c(3,3,3,3,1), lwd=2, bty='n', cex=.75)))
+plotDist("f", df1=2, df2=2, col="blue", lty=3, lwd=2, add=TRUE)
+plotDist("f", df1=4, df2=4, col="red", lty=3, lwd=2, add=TRUE)
+plotDist("f", df1=8, df2=100, col="purple", lty=3, lwd=2, add=TRUE)
+plotDist("f", df1=1, df2=998, col="black", lty=1, lwd=2, add=TRUE)
+crit <- qf(p = 0.95, df1 = 1, df2 = 998)
+crit
+```
 
+```{r}
+ladd(panel.abline(v=crit, col="red", lty=1, lwd=1))
+```
+
+```{r}
+plotDist("f", df1=1, df2 = 998,
+          main="df1 = 1, df2 = 998",
+          xlab="x",
+          ylab="f(x)",
+          xlim=c(0,5),
+          ylim=c(0,1.5))
+crit <- qf(p = 0.95, df1 = 1, df2 = 998)
+crit
+```
+
+```{r}
+ladd(panel.abline(v=crit, col="red", lty=1, lwd=1))
+ladd(panel.polygon(cbind(c(crit,seq(from=crit, to=12, length.out=1000), 12),
+  c(0,df(seq(from=crit, to=12, length.out=1000),df1=1,df2=998),0)),
+  border="black", col=rgb(0, 0, 1, 0.5)))
+```
+
+```{r}
+pf(q = fratio, df1 = 1, df2 = 2, lower.tail = FALSE)
+```
+
+```{r}
+a <- aov(data = d, height ~ weight)
+summary(a)
+```
+
+```{r}
+rsq <- SSR / SSY
+rsq
+```
+
+```{r}
+rho <- sqrt(rsq)
+rho
+```
+
+```{r}
+SSX <- sum((m$model$weight - mean(m$model$weight)) ^ 2) # how much x variation there is
+SEbeta1 <- sqrt(MSE / SSX) 
+SEbeta1
+```
+
+```{r}
+SEbeta0 <- sqrt((MSE * sum(m$model$weight ^ 2)) / (1000 * SSX))
+SEbeta0
+```
+
+```{r}
+SEyhat <- sqrt(MSE * (1 / 1000 + (m$model$weight - mean(m$model$weight)) ^ 2 / SSX))
+head(SEyhat) # just the first 6 rows
+```
+
+```{r}
+summary(m)
+```
+
+```{r}
+m <- lm(zombies_killed ~ age, data = d)
+coefficients <- tidy(m)
+coefficients <- coefficients %>% mutate(`t.calc` = estimate / std.error)
+coefficients <- coefficients %>% mutate(`p.calc` = 2 * (1-pt(abs(t.calc), df = nrow(m$model)-2)))
+# the p value is 2 times the tail probability implied by the t statistic
+coefficients
+```
+
+Challenge:
+```{r}
+m <- lm(data = d, height ~ weight)
+e <- m$residuals
+plot(x = d$weight, y = e)
+# or we could use the function `resid()`
+e <- resid(m)
+plot(x = d$weight, y = e)
+```
+
+```{r}
+histogram(e, xlim = c(-4 * sd(e), 4 * sd(e)), breaks = 20, main = "Histogram of Residuals")
+```
+
+```{r}
+histogram(e, xlim = c(-4 * sd(e), 4 * sd(e)), breaks = 20, main = "Histogram of Residuals")
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(m)
+```
+
+```{r}
+(s <- shapiro.test(m$residuals))
+```
+
+```{r}
+# `id=FALSE` means that outlier observations will not be labelled
+library(ggpubr)
+ggqqplot(m$residuals)
+```
+
+```{r}
+detach(package:ggpubr)
+```
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/KamilarAndCooperData.csv"
+d <- read_csv(f, col_names = TRUE)
+names(d)
+```
+
+```{r}
+d <- select(d, WeaningAge = "WeaningAge_d", FemaleBodyMass = "Body_mass_female_mean")
+# keep select columns
+d <- na.omit(d)  # get rid of NAs
+ggplot(data = d, aes(x = FemaleBodyMass, y = WeaningAge)) + geom_point() + geom_smooth(method = "lm")
+```
+
+```{r}
+# by hand
+beta1 <- cor(d$FemaleBodyMass, d$WeaningAge) * (sd(d$WeaningAge)/sd(d$FemaleBodyMass))
+beta1
+```
+
+```{r}
+beta0 <- mean(d$WeaningAge) - beta1 * mean(d$FemaleBodyMass)
+beta0
+```
+
+```{r}
+# using lm()
+m <- lm(data = d, WeaningAge ~ FemaleBodyMass)
+```
+
+```{r}
+# by hand
+SSY <- sum((m$model$WeaningAge - mean(m$model$WeaningAge))^2)
+SSR <- sum((m$fitted.values - mean(m$model$WeaningAge))^2)
+SSE <- sum((m$model$WeaningAge - m$fitted.values)^2)
+DFR <- 1
+DFE <- nrow(d) - DFR - 1
+DFY <- nrow(d) - DFR
+MSR <- SSR/DFR
+MSE <- SSE/DFE
+MSY <- SSY/DFY
+fratio <- MSR/MSE
+p <- 1 - pf(q = fratio, df1 = DFR, df2 = DFE)
+(aov_table <- tibble(Source = c("Regression", "Error", "Total"), df = c(DFR, DFE,
+    DFY), `Sum Sq` = c(SSR, SSE, SSY), `Mean Sq` = c(MSR, MSE, MSY), `F value` = c(fratio,
+    NA, NA), p = c(p, NA, NA)))
+```
+
+```{r}
+# using summary.aov()
+summary.aov(m)
+```
+
+```{r}
+residuals <- m$residuals
+plot(residuals ~ d$FemaleBodyMass, xlab = "Female Body Mass", ylab = "Residuals")
+```
+
+```{r}
+hist(residuals, breaks = 20, main = "Histogram of Residuals")
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(m)
+```
+
+```{r}
+par(mfrow = c(1, 1))
+qqnorm(m$residuals)
+qqline(m$residuals)
+```
+
+```{r}
+(s <- shapiro.test(m$residuals))
+```
+
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/KamilarAndCooperData.csv"
+d <- read_csv(f, col_names = TRUE)
+names(d)
+```
+
+
+```{r}
+# keep select columns
+d <- select(d, WeaningAge = "WeaningAge_d", FemaleBodyMass = "Body_mass_female_mean")
+d <- na.omit(d)  # get rid of NAs
+d$logWeaningAge <- log(d$WeaningAge)
+d$logFemaleBodyMass <- log(d$FemaleBodyMass)
+ggplot(data = d, aes(x = logFemaleBodyMass, y = logWeaningAge)) + geom_point() +
+    geom_smooth(method = "lm")
+```
+
+```{r}
+# or plot(data=d, logWeaningAge ~ logFemaleBodyMass)
+m <- lm(data = d, logWeaningAge ~ logFemaleBodyMass)
+summary(m)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(m)
+```
+
+```{r}
+par(mfrow = c(1, 1))
+qqPlot(m$residuals)  ## qqPlot from {car}
+```
+
+```{r}
+(s <- shapiro.test(m$residuals))
+```
+
+```{r}
+par(mfrow = c(1, 2))
+a <- 2
+b <- 2
+
+# LOG X
+x <- seq(from = 0, to = 100, length.out = 1000)
+y <- a + b * log(x)
+plot(x, y, type = "l", main = "untransformed")
+plot(log(x), y, type = "l", main = "log(x)")
+```
+
+```{r}
+# ASYMPTOTIC
+x <- seq(from = 1, to = 100, length.out = 100)
+y <- (a * x)/(1 + b * x)
+plot(x, y, type = "l", main = "untransformed")
+plot(1/x, y, type = "l", main = "1/x")
+```
+
+```{r}
+# RECIPROCAL
+x <- seq(from = 1, to = 100, length.out = 100)
+y <- a + b/x
+plot(x, y, type = "l", main = "untransformed")
+plot(1/x, y, type = "l", main = "1/x")
+```
+
+```{r}
+# POWER - a power transformation for the explanatory variable is useful # if
+# there is a curvilinear relationship between the explanatory variable and the
+# response variable
+x <- seq(from = 1, to = 100, length.out = 100)
+y <- a * x^b
+plot(x, y, type = "l", main = "untransformed")
+plot(x^b, y, type = "l", main = "x^b")
+```
+
+```{r}
+# EXPONENTIAL
+x <- seq(from = 1, to = 10, length.out = 100)
+y <- a * exp(b * x)
+plot(x, y, type = "l", main = "untransformed")
+plot(x, log(y), type = "l", main = "log(y)")
 ```
 
 ```{r}
 
 ```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
-
-```
-
-
 
