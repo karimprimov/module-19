@@ -1,0 +1,175 @@
+---
+title: "module-19"
+author: "Karim Primov"
+date: "3/31/2022"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(car)
+library(broom)
+
+```
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/Street_et_al_2017.csv"
+d <- read_csv(f, col_names = TRUE)
+```
+
+Removing NAs
+```{r}
+d_mod <- d %>% filter(!is.na(ECV) & !is.na(Body_mass)) 
+```
+
+
+```{r}
+m <- lm(data = d_mod, log(ECV) ~ log(Body_mass))
+```
+
+
+Regression coefficient
+```{r}
+b1 <- cor(log(d_mod$ECV), log(d_mod$Body_mass)) * sd(log(d_mod$ECV))/sd(log(d_mod$Body_mass))
+b1
+```
+
+```{r}
+b0 <- mean(log(d_mod$ECV)) - b1*mean(log(d_mod$Body_mass))
+b0
+```
+
+
+```{r}
+model <- lm(formula = log(ECV)~ log(Body_mass), data = d_mod)
+model
+summary(model)
+```
+
+```{r}
+SSY <- sum(m$model$`log(ECV)` - mean(m$model$`log(Body_mass)`))^2
+SSY
+```
+
+```{r}
+SSR <- sum((m$fitted.values - mean(m$model$`log(ECV)`))^2)
+SSR
+```
+
+```{r}
+SSE <- sum((m$model$`log(ECV)` - m$fitted.values)^2)
+SSE
+```
+
+```{r}
+SSEalt <- sum(m$residuals^2)
+SSEalt
+```
+
+```{r}
+(df_regression <- 1)
+```
+
+```{r}
+(df_error <- nrow(d_mod) - df_regression - 1)
+```
+
+```{r}
+(df_y <- nrow(d_mod) - df_regression)
+```
+
+```{r}
+MSR <- SSR - df_regression
+MSE <- SSE/df_error
+MSY <- SSY/df_y
+
+MSR
+MSE
+MSY
+```
+
+```{r}
+fratio <- MSR/MSE
+fratio 
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+
