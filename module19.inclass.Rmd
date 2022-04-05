@@ -1,0 +1,154 @@
+---
+title: "moule19.inclass"
+author: "Karim Primov"
+date: "4/5/2022"
+output: html_document
+---
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/KamilarAndCooperData.csv"
+d <- read_csv(f, col_names = TRUE)
+names(d)
+```
+
+
+```{r}
+df <- select(d, MaxLongevity = "MaxLongevity_m", FemaleBodyMass = "Body_mass_female_mean")
+# keep select columns
+df <- na.omit(df)  # get rid of NAs
+ggplot(data = df, aes(x = FemaleBodyMass, y = MaxLongevity)) + geom_point() + geom_smooth(method = "lm")
+```
+Linear models:
+
+lifespan ~ female body mass
+```{r}
+l.f.m <- lm(data = df, df$MaxLongevity ~ df$FemaleBodyMass)
+l.f.m
+```
+
+lifespan ~ log(female body mass)
+```{r}
+l.logf.m <- lm(data = df, df$MaxLongevity ~ log(df$FemaleBodyMass))
+l.logf.m
+```
+
+log(lifespan) ~ log(female body mass)
+```{r}
+logl.logf.m <- lm(data = df, log(df$MaxLongevity) ~ log(df$FemaleBodyMass))
+logl.logf.m
+```
+
+Calculating and plotting residuals
+```{r}
+residuals <- l.f.m$residuals
+plot(residuals ~ df$FemaleBodyMass, xlab = "Female Body Mass", ylab = "Residuals")
+hist(residuals)
+par(mfrow = c(1, 1))
+qqnorm(l.f.m$residuals)
+qqline(l.f.m$residuals)
+(s <- shapiro.test(l.f.m$residuals))
+```
+
+```{r}
+residuals <- l.logf.m$residuals
+plot(residuals ~ log(df$FemaleBodyMass), xlab = "Female Body Mass", ylab = "Residuals")
+hist(residuals)
+par(mfrow = c(1, 1))
+qqnorm(l.logf.m$residuals)
+qqline(l.logf.m$residuals)
+(s <- shapiro.test(l.logf.m$residuals))
+```
+
+```{r}
+residuals <- logl.logf.m$residuals
+plot(residuals ~ log(df$FemaleBodyMass), xlab = "Female Body Mass", ylab = "Residuals")
+hist(residuals)
+par(mfrow = c(1, 1))
+qqnorm(logl.logf.m$residuals)
+qqline(logl.logf.m$residuals)
+(s <- shapiro.test(logl.logf.m$residuals))
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
