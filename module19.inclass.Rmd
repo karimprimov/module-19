@@ -43,30 +43,45 @@ Calculating and plotting residuals
 residuals <- l.f.m$residuals
 plot(residuals ~ df$FemaleBodyMass, xlab = "Female Body Mass", ylab = "Residuals")
 hist(residuals)
+
 par(mfrow = c(1, 1))
 qqnorm(l.f.m$residuals)
 qqline(l.f.m$residuals)
+
 (s <- shapiro.test(l.f.m$residuals))
+
+par(mfrow = c(2, 2))
+plot(l.f.m)
 ```
 
 ```{r}
 residuals <- l.logf.m$residuals
 plot(residuals ~ log(df$FemaleBodyMass), xlab = "Female Body Mass", ylab = "Residuals")
 hist(residuals)
+
 par(mfrow = c(1, 1))
 qqnorm(l.logf.m$residuals)
 qqline(l.logf.m$residuals)
+
 (s <- shapiro.test(l.logf.m$residuals))
+
+par(mfrow = c(2, 2))
+plot(l.logf.m)
 ```
 
 ```{r}
 residuals <- logl.logf.m$residuals
 plot(residuals ~ log(df$FemaleBodyMass), xlab = "Female Body Mass", ylab = "Residuals")
 hist(residuals)
+
 par(mfrow = c(1, 1))
 qqnorm(logl.logf.m$residuals)
 qqline(logl.logf.m$residuals)
+
 (s <- shapiro.test(logl.logf.m$residuals))
+
+par(mfrow = c(2, 2))
+plot(logl.logf.m)
 ```
 
 ```{r}
