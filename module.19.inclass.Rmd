@@ -1,0 +1,91 @@
+---
+title: "module-19.exercise"
+author: "Karim Primov"
+date: "4/7/2022"
+output: html_document
+---
+
+```{r}
+f <- "https://raw.githubusercontent.com/difiore/ada-2022-datasets/main/KamilarAndCooperData.csv"
+d <- read_csv(f, col_names = TRUE)
+names(d)
+```
+
+
+```{r}
+# keep select columns
+d <- select(d, WeaningAge = "WeaningAge_d", FemaleBodyMass = "Body_mass_female_mean")
+d <- na.omit(d)  # get rid of NAs
+d$logWeaningAge <- log(d$WeaningAge)
+d$logFemaleBodyMass <- log(d$FemaleBodyMass)
+ggplot(data = d, aes(x = logFemaleBodyMass, y = logWeaningAge)) + geom_point() +
+    geom_smooth(method = "lm")
+```
+
+```{r}
+# or plot(data=d, logWeaningAge ~ logFemaleBodyMass)
+m <- lm(data = d, logWeaningAge ~ logFemaleBodyMass)
+summary(m)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(m)
+```
+
+```{r}
+par(mfrow = c(1, 1))
+qqPlot(m$residuals)  ## qqPlot from {car}
+```
+
+```{r}
+(s <- shapiro.test(m$residuals))
+```
+
+```{r}
+par(mfrow = c(1, 2))
+a <- 2
+b <- 2
+# LOG X
+x <- seq(from = 0, to = 100, length.out = 1000)
+y <- a + b * log(x)
+plot(x, y, type = "l", main = "untransformed")
+plot(log(x), y, type = "l", main = "log(x)")
+```
+
+```{r}
+# ASYMPTOTIC
+x <- seq(from = 1, to = 100, length.out = 100)
+y <- (a * x)/(1 + b * x)
+plot(x, y, type = "l", main = "untransformed")
+plot(1/x, y, type = "l", main = "1/x")
+```
+
+```{r}
+# RECIPROCAL
+x <- seq(from = 1, to = 100, length.out = 100)
+y <- a + b/x
+plot(x, y, type = "l", main = "untransformed")
+plot(1/x, y, type = "l", main = "1/x")
+```
+
+```{r}
+# POWER - a power transformation for the explanatory variable is useful # if
+# there is a curvilinear relationship between the explanatory variable and the
+# response variable
+x <- seq(from = 1, to = 100, length.out = 100)
+y <- a * x^b
+plot(x, y, type = "l", main = "untransformed")
+plot(x^b, y, type = "l", main = "x^b")
+```
+
+```{r}
+# EXPONENTIAL
+x <- seq(from = 1, to = 10, length.out = 100)
+y <- a * exp(b * x)
+plot(x, y, type = "l", main = "untransformed")
+plot(x, log(y), type = "l", main = "log(y)")
+```
+
+```{r}
+```
